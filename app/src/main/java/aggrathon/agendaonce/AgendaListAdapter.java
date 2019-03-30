@@ -3,6 +3,7 @@ package aggrathon.agendaonce;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.CalendarContract;
@@ -24,13 +25,18 @@ public class AgendaListAdapter extends BaseAdapter {
 			CalendarContract.Instances.BEGIN,         // 1
 			CalendarContract.Instances.END,           // 2
 			CalendarContract.Instances.TITLE,         // 3
-			CalendarContract.Instances.ALL_DAY        // 4
+			CalendarContract.Instances.ALL_DAY,       // 4
+			CalendarContract.Instances.EVENT_COLOR,   // 5
+			CalendarContract.Instances.CALENDAR_COLOR,// 6
+			CalendarContract.Instances.VISIBLE
 	};
 	private static final int PROJECTION_ID_INDEX = 0;
 	private static final int PROJECTION_BEGIN_INDEX = 1;
 	private static final int PROJECTION_END_INDEX = 2;
 	private static final int PROJECTION_TITLE_INDEX = 3;
 	private static final int PROJECTION_ALL_DAY_INDEX = 4;
+	private static final int PROJECTION_COLOR_INDEX = 5;
+	private static final int PROJECTION_COLOR2_INDEX = 6;
 
 	private static final int MILLIS_PER_HOUR = 1000 * 60 * 60;
 
@@ -38,19 +44,24 @@ public class AgendaListAdapter extends BaseAdapter {
 	private ArrayList<Long> ids;
 	private ArrayList<String> titles;
 	private ArrayList<String> times;
+	private ArrayList<Integer> colors;
+	private int max;
 
-	public AgendaListAdapter(Activity act) {
+	public AgendaListAdapter(Activity act, int maxEvents) {
 		activity = act;
 
 		ids = new ArrayList<>();
 		titles = new ArrayList<>();
 		times = new ArrayList<>();
+		colors = new ArrayList<>();
+		max = maxEvents;
 	}
 
 	public void RefreshEvents() {
 		ids.clear();
 		titles.clear();
 		times.clear();
+		colors.clear();
 
 		Calendar currentTime = Calendar.getInstance();
 		Calendar beginTime = Calendar.getInstance();
@@ -63,7 +74,7 @@ public class AgendaListAdapter extends BaseAdapter {
 		Uri.Builder builder = CalendarContract.Instances.CONTENT_URI.buildUpon();
 		ContentUris.appendId(builder, startMillis);
 		ContentUris.appendId(builder, endMillis);
-		Cursor cur =  cr.query(builder.build(), INSTANCE_PROJECTION, null, null, CalendarContract.Instances.BEGIN);
+		Cursor cur =  cr.query(builder.build(), INSTANCE_PROJECTION, CalendarContract.Instances.VISIBLE + " = 1", null, CalendarContract.Instances.BEGIN);
 
 		DateFormat formatterDateTime = new SimpleDateFormat("EEEE d MMMM H:mm");
 		DateFormat formatterTime = new SimpleDateFormat("H:mm");
@@ -71,6 +82,9 @@ public class AgendaListAdapter extends BaseAdapter {
 		while (cur.moveToNext()) {
 			ids.add(cur.getLong(PROJECTION_ID_INDEX));
 			titles.add(cur.getString(PROJECTION_TITLE_INDEX));
+			int color = cur.getInt(PROJECTION_COLOR_INDEX);
+			if (color == 0) color = cur.getInt(PROJECTION_COLOR2_INDEX);
+			colors.add(color);
 			beginTime.setTimeInMillis(cur.getLong(PROJECTION_BEGIN_INDEX));
 			endTime.setTimeInMillis(cur.getLong(PROJECTION_END_INDEX));
 			if (cur.getInt(PROJECTION_ALL_DAY_INDEX) != 0) {
@@ -93,8 +107,9 @@ public class AgendaListAdapter extends BaseAdapter {
 					times.add(formatterDateTime.format(beginTime.getTime()) + " - " + formatterDateTime.format(endTime.getTime()));
 				}
 			}
+			if (ids.size() == max) break;
 		}
-
+		cur.close();
 		notifyDataSetChanged();
 	}
 
@@ -114,12 +129,21 @@ public class AgendaListAdapter extends BaseAdapter {
 	}
 
 	@Override
-	public View getView(int position, View convertView, ViewGroup container) {
+	public View getView(final int position, View convertView, ViewGroup container) {
 		if (convertView == null) {
 			convertView = activity.getLayoutInflater().inflate(R.layout.list_item, container, false);
 		}
 		((TextView)convertView.findViewById(R.id.text1)).setText(titles.get(position));
 		((TextView)convertView.findViewById(R.id.text2)).setText(times.get(position));
+		(convertView.findViewById(R.id.color)).setBackgroundColor(colors.get(position));
+		convertView.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				Uri uri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, getItemId(position));
+				Intent intent = new Intent(Intent.ACTION_VIEW).setData(uri);
+				activity.startActivity(intent);
+			}
+		});
 		return convertView;
 	}
 }

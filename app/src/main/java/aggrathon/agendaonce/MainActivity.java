@@ -26,13 +26,18 @@ public class MainActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		listAgenda = findViewById(R.id.agenda_list);
-		adapter = new AgendaListAdapter(this);
+		adapter = new AgendaListAdapter(this, 50);
 		listAgenda.setAdapter(adapter);
+	}
+
+	@Override
+	protected void onResume() {
 		if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED) {
 			adapter.RefreshEvents();
 		} else {
 			ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_CALENDAR}, CALENDAR_READ_PERMISSION);
 		}
+		super.onResume();
 	}
 
 	public void OnCalendar(View v) {
