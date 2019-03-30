@@ -28,6 +28,8 @@ public class AgendaListAdapter extends BaseAdapter {
 			CalendarContract.Instances.ALL_DAY,       // 4
 			CalendarContract.Instances.EVENT_COLOR,   // 5
 			CalendarContract.Instances.CALENDAR_COLOR,// 6
+			CalendarContract.Instances.EVENT_LOCATION,// 7
+			CalendarContract.Instances.HAS_ALARM,     // 8
 			CalendarContract.Instances.VISIBLE
 	};
 	private static final int PROJECTION_ID_INDEX = 0;
@@ -37,6 +39,8 @@ public class AgendaListAdapter extends BaseAdapter {
 	private static final int PROJECTION_ALL_DAY_INDEX = 4;
 	private static final int PROJECTION_COLOR_INDEX = 5;
 	private static final int PROJECTION_COLOR2_INDEX = 6;
+	private static final int PROJECTION_LOCATION_INDEX = 7;
+	private static final int PROJECTION_ALARM_INDEX = 8;
 
 	private static final int MILLIS_PER_HOUR = 1000 * 60 * 60;
 
@@ -45,15 +49,18 @@ public class AgendaListAdapter extends BaseAdapter {
 	private ArrayList<String> titles;
 	private ArrayList<String> times;
 	private ArrayList<Integer> colors;
+	private ArrayList<Boolean> locations;
+	private ArrayList<Boolean> alarms;
 	private int max;
 
 	public AgendaListAdapter(Activity act, int maxEvents) {
 		activity = act;
-
 		ids = new ArrayList<>();
 		titles = new ArrayList<>();
 		times = new ArrayList<>();
 		colors = new ArrayList<>();
+		locations = new ArrayList<>();
+		alarms = new ArrayList<>();
 		max = maxEvents;
 	}
 
@@ -62,6 +69,8 @@ public class AgendaListAdapter extends BaseAdapter {
 		titles.clear();
 		times.clear();
 		colors.clear();
+		locations.clear();
+		alarms.clear();
 
 		Calendar currentTime = Calendar.getInstance();
 		Calendar beginTime = Calendar.getInstance();
@@ -85,6 +94,9 @@ public class AgendaListAdapter extends BaseAdapter {
 			int color = cur.getInt(PROJECTION_COLOR_INDEX);
 			if (color == 0) color = cur.getInt(PROJECTION_COLOR2_INDEX);
 			colors.add(color);
+			String loc = cur.getString(PROJECTION_LOCATION_INDEX);
+			locations.add(loc != null && loc.length() > 0);
+			alarms.add(cur.getInt(PROJECTION_ALARM_INDEX) != 0);
 			beginTime.setTimeInMillis(cur.getLong(PROJECTION_BEGIN_INDEX));
 			endTime.setTimeInMillis(cur.getLong(PROJECTION_END_INDEX));
 			if (cur.getInt(PROJECTION_ALL_DAY_INDEX) != 0) {
@@ -133,9 +145,11 @@ public class AgendaListAdapter extends BaseAdapter {
 		if (convertView == null) {
 			convertView = activity.getLayoutInflater().inflate(R.layout.list_item, container, false);
 		}
-		((TextView)convertView.findViewById(R.id.text1)).setText(titles.get(position));
-		((TextView)convertView.findViewById(R.id.text2)).setText(times.get(position));
-		(convertView.findViewById(R.id.color)).setBackgroundColor(colors.get(position));
+		((TextView)convertView.findViewById(R.id.title)).setText(titles.get(position));
+		((TextView)convertView.findViewById(R.id.time)).setText(times.get(position));
+		convertView.findViewById(R.id.color).setBackgroundColor(colors.get(position));
+		convertView.findViewById(R.id.alarm).setVisibility(alarms.get(position)? View.VISIBLE : View.GONE);
+		convertView.findViewById(R.id.location).setVisibility(locations.get(position)? View.VISIBLE : View.GONE);
 		convertView.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
