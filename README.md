@@ -15,3 +15,4 @@ The app only needs one permission, read calendar.
  - Widget with the same agenda view.
  - Touching events in the agenda opens them in you prefered calendar app.
  - Widget uses calendar broadcasts instead of periodical updates for increased battery life.
+ - Respects the visibilty setting for different calendars.
