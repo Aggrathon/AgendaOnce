@@ -14,7 +14,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
 
-public class MainActivity extends AppCompatActivity {
+public class AgendaActivity extends AppCompatActivity {
 
 	public static int CALENDAR_READ_PERMISSION = 13249;
 
@@ -24,9 +24,9 @@ public class MainActivity extends AppCompatActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
+		setContentView(R.layout.agenda_activity);
 		listAgenda = findViewById(R.id.agenda_list);
-		adapter = new AgendaListAdapter(this, 50);
+		adapter = new AgendaListAdapter(this);
 		listAgenda.setAdapter(adapter);
 	}
 
@@ -41,11 +41,19 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	public void OnCalendar(View v) {
+		startActivity(OpenCalendarIntent());
+	}
+
+	public static Intent OpenCalendarIntent() {
 		Uri.Builder builder = CalendarContract.CONTENT_URI.buildUpon();
 		builder.appendPath("time");
 		ContentUris.appendId(builder, System.currentTimeMillis());
-		Intent intent = new Intent(Intent.ACTION_VIEW).setData(builder.build());
-		startActivity(intent);
+		return new Intent(Intent.ACTION_VIEW).setData(builder.build());
+	}
+
+	public static Intent OpenEventIntent(long id) {
+		Uri uri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, id);
+		return new Intent(Intent.ACTION_VIEW).setData(uri);
 	}
 
 	@Override

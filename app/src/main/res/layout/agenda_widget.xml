@@ -1,0 +1,17 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/widget_margin">
+
+    <Button
+        android:id="@+id/calendar_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/calendar" />
+
+    <ListView
+        android:id="@+id/agenda_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+</FrameLayout>
