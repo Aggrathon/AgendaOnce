@@ -8,3 +8,10 @@ not one listing per day.
 
 The latest release can be found [here](https://github.com/Aggrathon/AgendaOnce/releases/).  
 The app only needs one permission, read calendar.
+
+## Features
+
+ - Calendar agenda where multiday events are only shown once.
+ - Widget with the same agenda view.
+ - Touching events in the agenda opens them in you prefered calendar app.
+ - Widget uses calendar broadcasts instead of periodical updates for increased battery life.
