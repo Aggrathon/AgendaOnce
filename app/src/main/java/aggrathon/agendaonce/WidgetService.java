@@ -62,7 +62,6 @@ class WidgetServiceFactory implements RemoteViewsService.RemoteViewsFactory {
 		Intent fillInIntent = new Intent();
 		fillInIntent.putExtras(extras);
 		rv.setOnClickFillInIntent(R.id.frame, fillInIntent);
-//		rv.setOnClickFillInIntent(R.id.frame, AgendaActivity.OpenCalendarIntent());
 
 		return rv;
 	}

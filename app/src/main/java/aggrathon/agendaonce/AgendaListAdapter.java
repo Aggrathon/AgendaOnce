@@ -41,7 +41,7 @@ public class AgendaListAdapter extends BaseAdapter {
 	@Override
 	public View getView(final int position, View convertView, ViewGroup container) {
 		if (convertView == null) {
-			convertView = activity.getLayoutInflater().inflate(R.layout.widget_item, container, false);
+			convertView = activity.getLayoutInflater().inflate(R.layout.list_item, container, false);
 		}
 		((TextView)convertView.findViewById(R.id.title)).setText(events.get(position).title);
 		((TextView)convertView.findViewById(R.id.time)).setText(events.get(position).time);

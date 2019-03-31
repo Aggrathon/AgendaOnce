@@ -20,6 +20,7 @@ public class AgendaWidget extends AppWidgetProvider {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
+		Log.d("ASD", intent.getAction());
 		if (intent.getAction().equals(VIEW_ACTION)) {
 			long eventId = intent.getLongExtra(EXTRA_ITEM, 0);
 			Uri uri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, eventId);
@@ -38,15 +39,22 @@ public class AgendaWidget extends AppWidgetProvider {
 	static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
 		RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.agenda_widget);
 		// Widget Service Intent
-		Intent intent = new Intent(context, WidgetService.class);
-		intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
-		intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)));
-		views.setRemoteAdapter(R.id.agenda_list, intent);
+		Intent serviceIntent = new Intent(context, WidgetService.class);
+		serviceIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+		serviceIntent.setData(Uri.parse(serviceIntent.toUri(Intent.URI_INTENT_SCHEME)));
+		views.setRemoteAdapter(R.id.agenda_list, serviceIntent);
 		views.setEmptyView(R.id.agenda_list, R.id.calendar_button);
-		// Click Intent
+		// Calendar Intent
 		Intent clickIntent = AgendaActivity.OpenCalendarIntent();
-		PendingIntent pendint = PendingIntent.getActivity(context, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-		views.setOnClickPendingIntent(R.id.calendar_button, pendint);
+		PendingIntent clickPI = PendingIntent.getActivity(context, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+		views.setOnClickPendingIntent(R.id.calendar_button, clickPI);
+		// View Intent
+		Intent viewIntent = new Intent(context, AgendaWidget.class);
+		viewIntent.setAction(AgendaWidget.VIEW_ACTION);
+		viewIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+		viewIntent.setData(Uri.parse(viewIntent.toUri(Intent.URI_INTENT_SCHEME)));
+		PendingIntent viewPI = PendingIntent.getBroadcast(context, 0, viewIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+		views.setPendingIntentTemplate(R.id.agenda_list, viewPI);
 		// Update
 		appWidgetManager.updateAppWidget(appWidgetId, views);
 	}

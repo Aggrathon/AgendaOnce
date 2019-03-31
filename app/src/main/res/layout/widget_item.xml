@@ -20,14 +20,14 @@
             android:layout_width="16dp"
             android:layout_height="16dp"
             android:contentDescription="@string/alarm"
-            app:srcCompat="@drawable/alarm" />
+            android:src="@drawable/alarm" />
 
         <ImageView
             android:id="@+id/location"
             android:layout_width="16dp"
             android:layout_height="16dp"
             android:contentDescription="@string/location"
-            app:srcCompat="@drawable/location" />
+            android:src="@drawable/location" />
 
     </LinearLayout>
 
@@ -41,7 +41,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/title"
-            android:textAlignment="textStart" />
+            android:textAlignment="textStart"
+            android:textColor="@android:color/white" />
 
         <TextView
             android:id="@+id/time"
@@ -49,6 +50,7 @@
             android:layout_height="wrap_content"
             android:text="@string/time"
             android:textAlignment="textEnd"
+            android:textColor="@android:color/darker_gray"
             android:textSize="12sp" />
     </LinearLayout>
 
