@@ -1,8 +1,11 @@
 package aggrathon.agendaonce;
 
 import android.appwidget.AppWidgetManager;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -18,7 +21,7 @@ public class WidgetService extends RemoteViewsService {
 	}
 }
 
-class WidgetServiceFactory implements RemoteViewsService.RemoteViewsFactory {
+class WidgetServiceFactory extends BroadcastReceiver implements RemoteViewsService.RemoteViewsFactory {
 	private ArrayList<EventData> events = new ArrayList<>();
 	private Context mContext;
 	private int mAppWidgetId;
@@ -28,23 +31,38 @@ class WidgetServiceFactory implements RemoteViewsService.RemoteViewsFactory {
 		mAppWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
 	}
 
+	// Calendar Update Listener registration
 	@Override
 	public void onCreate() {
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(Intent.ACTION_PROVIDER_CHANGED);
+		filter.addDataScheme("content");
+		filter.addDataAuthority("com.android.calendar", null);
+		mContext.registerReceiver(this, filter);
 	}
 
-	@Override
-	public void onDataSetChanged() {
-		events = EventData.Factory().ReadCalendar(mContext, 30, 20);
-	}
-
+	// Calendar Update Listener unregistration
 	@Override
 	public void onDestroy() {
 		events.clear();
+		mContext.unregisterReceiver(this);
+	}
+
+	// Calendar Update Listener
+	@Override
+	public void onReceive(Context context, Intent intent) {
+		AppWidgetManager mgr = AppWidgetManager.getInstance(context);
+		mgr.notifyAppWidgetViewDataChanged(new int[]{mAppWidgetId}, R.id.agenda_list);
 	}
 
 	@Override
 	public int getCount() {
 		return events.size();
+	}
+
+	@Override
+	public void onDataSetChanged() {
+		events = EventData.Factory().ReadCalendar(mContext, 30, 20);
 	}
 
 	@Override

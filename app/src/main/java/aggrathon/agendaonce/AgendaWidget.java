@@ -3,9 +3,13 @@ package aggrathon.agendaonce;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
+import android.util.Log;
 import android.widget.RemoteViews;
 
 public class AgendaWidget extends AppWidgetProvider {
@@ -20,8 +24,8 @@ public class AgendaWidget extends AppWidgetProvider {
 				context.startActivity(AgendaActivity.OpenCalendarIntent());
 			else
 				context.startActivity(AgendaActivity.OpenEventIntent(eventId));
-		}
-		super.onReceive(context, intent);
+		} else
+			super.onReceive(context, intent);
 	}
 
 	static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
