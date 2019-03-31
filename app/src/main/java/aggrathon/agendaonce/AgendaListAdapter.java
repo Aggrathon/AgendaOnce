@@ -21,13 +21,7 @@ public class AgendaListAdapter extends BaseAdapter {
 
 	public void RefreshEvents() {
 		events = EventData.Factory().ReadCalendar(activity, 30, 50);
-		if (events.size() == 0) events.add(EventData.Factory().NoEvents(30));
 		notifyDataSetChanged();
-	}
-
-	public void ShowPermissionNotice() {
-		events.clear();
-		events.add(EventData.Factory().Permission());
 	}
 
 	@Override

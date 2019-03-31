@@ -1,6 +1,8 @@
 package aggrathon.agendaonce;
 
 import android.Manifest;
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.ContentUris;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -37,7 +39,6 @@ public class AgendaActivity extends AppCompatActivity {
 			adapter.RefreshEvents();
 		} else {
 			ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_CALENDAR}, CALENDAR_READ_PERMISSION);
-			adapter.ShowPermissionNotice();
 		}
 		super.onResume();
 	}
@@ -45,10 +46,10 @@ public class AgendaActivity extends AppCompatActivity {
 	@Override
 	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 		if (requestCode == CALENDAR_READ_PERMISSION) {
-			if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-				adapter.RefreshEvents();
-			else
-				adapter.ShowPermissionNotice();
+			adapter.RefreshEvents();
+			AppWidgetManager mgr = AppWidgetManager.getInstance(this);
+			int[] ids = mgr.getAppWidgetIds(new ComponentName(getApplication(), AgendaWidget.class));
+			mgr.notifyAppWidgetViewDataChanged(ids, R.id.agenda_list);
 		} else
 			super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 	}

@@ -146,6 +146,13 @@ class EventDataFactory {
 				if (list.size() >= maxEvents) break;
 			}
 			cur.close();
+			if (list.size() == 0) {
+				list.add(NoEvents(days));
+			}
+		} catch (SecurityException e) {
+			Log.e("EventData", "Permission Denied");
+			list.clear();
+			list.add(Permission());
 		} catch (Exception e) {
 			Log.e("EventData", e.getLocalizedMessage(), e);
 		}

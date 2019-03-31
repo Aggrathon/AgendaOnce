@@ -20,8 +20,8 @@ public class AgendaWidget extends AppWidgetProvider {
 	public void onReceive(Context context, Intent intent) {
 		if (intent.getAction().equals(VIEW_ACTION)) {
 			long eventId = intent.getLongExtra(EVENT_ID, 0);
-			if (eventId == 0)
-				context.startActivity(AgendaActivity.OpenCalendarIntent());
+			if (eventId == EventData.NO_EVENT_ID)
+				context.startActivity(new Intent(context, AgendaActivity.class));
 			else
 				context.startActivity(AgendaActivity.OpenEventIntent(eventId));
 		} else
