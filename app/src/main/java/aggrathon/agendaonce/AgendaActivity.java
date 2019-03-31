@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
 
+
 public class AgendaActivity extends AppCompatActivity {
 
 	public static int CALENDAR_READ_PERMISSION = 13249;
@@ -36,8 +37,20 @@ public class AgendaActivity extends AppCompatActivity {
 			adapter.RefreshEvents();
 		} else {
 			ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_CALENDAR}, CALENDAR_READ_PERMISSION);
+			adapter.ShowPermissionNotice();
 		}
 		super.onResume();
+	}
+
+	@Override
+	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+		if (requestCode == CALENDAR_READ_PERMISSION) {
+			if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+				adapter.RefreshEvents();
+			else
+				adapter.ShowPermissionNotice();
+		} else
+			super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 	}
 
 	public void OnCalendar(View v) {
@@ -54,13 +67,5 @@ public class AgendaActivity extends AppCompatActivity {
 	public static Intent OpenEventIntent(long id) {
 		Uri uri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, id);
 		return new Intent(Intent.ACTION_VIEW).setData(uri);
-	}
-
-	@Override
-	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-		if (requestCode == CALENDAR_READ_PERMISSION) {
-			adapter.RefreshEvents();
-		} else
-			super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 	}
 }

@@ -3,7 +3,6 @@ package aggrathon.agendaonce;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.CalendarContract;
@@ -16,6 +15,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 public class EventData implements View.OnClickListener {
+
+	public static final int NO_EVENT_ID = 0;
+
 	public String title;
 	public String time;
 	public boolean alarm;
@@ -34,7 +36,10 @@ public class EventData implements View.OnClickListener {
 
 	@Override
 	public void onClick(View view) {
-		view.getContext().startActivity(AgendaActivity.OpenEventIntent(id));
+		if (id == NO_EVENT_ID)
+			view.getContext().startActivity(AgendaActivity.OpenCalendarIntent());
+		else
+			view.getContext().startActivity(AgendaActivity.OpenEventIntent(id));
 	}
 
 	public static EventDataFactory Factory() { return new EventDataFactory(); }
@@ -101,35 +106,49 @@ class EventDataFactory {
 		return new EventData(id, title, time, color1, alarm, location != null && location.length() > 0);
 	}
 
+	public EventData NoEvents(int days) {
+		return new EventData(0, "No events during the next "+ days + " days!", "", EventData.NO_EVENT_ID, false, false);
+	}
+
+	public EventData Loading() {
+		return new EventData(0, "Loading...", "", EventData.NO_EVENT_ID, false, false);
+	}
+
+	public EventData Permission() {
+		return new EventData(0, "Requires permission to read calendars", "", EventData.NO_EVENT_ID, false, false);
+	}
+
 	public ArrayList<EventData> ReadCalendar(Context context) { return ReadCalendar(context,30, 50); }
 
 	public ArrayList<EventData> ReadCalendar(Context context, int days, int maxEvents) {
 		ArrayList<EventData> list = new ArrayList<>();
+		try {
+			ContentResolver cr = context.getContentResolver();
+			Uri.Builder builder = CalendarContract.Instances.CONTENT_URI.buildUpon();
+			ContentUris.appendId(builder, currentTime.getTimeInMillis());
+			endTime = Calendar.getInstance();
+			endTime.roll(Calendar.DAY_OF_YEAR, days);
+			ContentUris.appendId(builder, endTime.getTimeInMillis());
+			Cursor cur = cr.query(builder.build(), INSTANCE_PROJECTION, CalendarContract.Instances.VISIBLE + " = 1", null, CalendarContract.Instances.BEGIN);
 
-		ContentResolver cr = context.getContentResolver();
-		Uri.Builder builder = CalendarContract.Instances.CONTENT_URI.buildUpon();
-		ContentUris.appendId(builder, currentTime.getTimeInMillis());
-		endTime = Calendar.getInstance();
-		endTime.roll(Calendar.DAY_OF_YEAR, days);
-		ContentUris.appendId(builder, endTime.getTimeInMillis());
-		Cursor cur =  cr.query(builder.build(), INSTANCE_PROJECTION, CalendarContract.Instances.VISIBLE + " = 1", null, CalendarContract.Instances.BEGIN);
-
-		while (cur.moveToNext()) {
-			list.add(Build(
-				cur.getLong(PROJECTION_ID_INDEX),
-				cur.getString(PROJECTION_TITLE_INDEX),
-				cur.getInt(PROJECTION_ALL_DAY_INDEX) > 0,
-				cur.getLong(PROJECTION_BEGIN_INDEX),
-				cur.getLong(PROJECTION_END_INDEX),
-				cur.getInt(PROJECTION_COLOR_INDEX),
-				cur.getInt(PROJECTION_COLOR2_INDEX),
-				cur.getInt(PROJECTION_ALARM_INDEX) > 0,
-				cur.getString(PROJECTION_LOCATION_INDEX)
-			));
-			if (list.size() >= maxEvents) break;
+			while (cur.moveToNext()) {
+				list.add(Build(
+						cur.getLong(PROJECTION_ID_INDEX),
+						cur.getString(PROJECTION_TITLE_INDEX),
+						cur.getInt(PROJECTION_ALL_DAY_INDEX) > 0,
+						cur.getLong(PROJECTION_BEGIN_INDEX),
+						cur.getLong(PROJECTION_END_INDEX),
+						cur.getInt(PROJECTION_COLOR_INDEX),
+						cur.getInt(PROJECTION_COLOR2_INDEX),
+						cur.getInt(PROJECTION_ALARM_INDEX) > 0,
+						cur.getString(PROJECTION_LOCATION_INDEX)
+				));
+				if (list.size() >= maxEvents) break;
+			}
+			cur.close();
+		} catch (Exception e) {
+			Log.e("EventData", e.getLocalizedMessage(), e);
 		}
-		cur.close();
-
 		return list;
 	}
 }

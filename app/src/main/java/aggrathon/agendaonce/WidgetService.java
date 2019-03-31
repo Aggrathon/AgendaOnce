@@ -58,7 +58,7 @@ class WidgetServiceFactory implements RemoteViewsService.RemoteViewsFactory {
 
 		// Next, we set a fill-intent which will be used to fill-in the pending intent template
 		Bundle extras = new Bundle();
-		extras.putLong(AgendaWidget.EXTRA_ITEM, events.get(position).id);
+		extras.putLong(AgendaWidget.EVENT_ID, events.get(position).id);
 		Intent fillInIntent = new Intent();
 		fillInIntent.putExtras(extras);
 		rv.setOnClickFillInIntent(R.id.frame, fillInIntent);

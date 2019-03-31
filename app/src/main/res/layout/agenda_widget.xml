@@ -5,10 +5,10 @@
     android:padding="@dimen/widget_margin">
 
     <Button
-        android:id="@+id/calendar_button"
+        android:id="@+id/placeholder"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/calendar" />
+        android:text="@string/open_app" />
 
     <ListView
         android:id="@+id/agenda_list"
