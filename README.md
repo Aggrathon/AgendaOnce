@@ -6,5 +6,5 @@ not one listing per day.
 
 ## Download
 
-The latest release can be found [here](releases/).  
+The latest release can be found [here](https://github.com/Aggrathon/AgendaOnce/releases/).  
 The app only needs one permission, read calendar.
