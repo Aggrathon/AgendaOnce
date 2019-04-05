@@ -24,14 +24,16 @@ public class EventData implements View.OnClickListener {
 	public boolean location;
 	public int color;
 	public long id;
+	public long millisEnd;
 
-	public EventData(long id, String title, String time, int color, boolean alarm, boolean location) {
+	public EventData(long id, String title, String time, int color, boolean alarm, boolean location, long end) {
 		this.title = title;
 		this.time = time;
 		this.alarm = alarm;
 		this.location = location;
 		this.color = color;
 		this.id = id;
+		millisEnd = end;
 	}
 
 	@Override
@@ -103,19 +105,19 @@ class EventDataFactory {
 			}
 		}
 		if (color1 == 0) color1 = color2;
-		return new EventData(id, title, time, color1, alarm, location != null && location.length() > 0);
+		return new EventData(id, title, time, color1, alarm, location != null && location.length() > 0, endTime.getTimeInMillis());
 	}
 
 	public EventData NoEvents(int days) {
-		return new EventData(0, "No events during the next "+ days + " days!", "", EventData.NO_EVENT_ID, false, false);
+		return new EventData(0, "No events during the next "+ days + " days!", "", EventData.NO_EVENT_ID, false, false, 0);
 	}
 
 	public EventData Loading() {
-		return new EventData(0, "Loading...", "", EventData.NO_EVENT_ID, false, false);
+		return new EventData(0, "Loading...", "", EventData.NO_EVENT_ID, false, false, 0);
 	}
 
 	public EventData Permission() {
-		return new EventData(0, "Requires permission to read calendars", "", EventData.NO_EVENT_ID, false, false);
+		return new EventData(0, "Requires permission to read calendars", "", EventData.NO_EVENT_ID, false, false, 0);
 	}
 
 	public ArrayList<EventData> ReadCalendar(Context context) { return ReadCalendar(context,30, 50); }
