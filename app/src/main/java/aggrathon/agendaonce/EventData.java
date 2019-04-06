@@ -6,6 +6,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.CalendarContract;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.View;
 
@@ -13,6 +14,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.TimeZone;
 
 public class EventData implements View.OnClickListener {
 
@@ -49,8 +51,6 @@ public class EventData implements View.OnClickListener {
 
 class EventDataFactory {
 
-	private static final int MILLIS_PER_HOUR = 1000 * 60 * 60;
-
 	private static final String[] INSTANCE_PROJECTION = new String[] {
 		CalendarContract.Instances.EVENT_ID,      // 0
 		CalendarContract.Instances.BEGIN,         // 1
@@ -74,19 +74,27 @@ class EventDataFactory {
 	private static final int PROJECTION_ALARM_INDEX = 8;
 
 	DateFormat formatterDateTime = new SimpleDateFormat("EEEE d MMMM H:mm");
+	DateFormat formatterShorter = new SimpleDateFormat("EEE d MMM H:mm");
 	DateFormat formatterTime = new SimpleDateFormat("H:mm");
 	DateFormat formatterDate = new SimpleDateFormat("EEEE d MMMM");
 	Calendar currentTime = Calendar.getInstance();
 	Calendar beginTime = Calendar.getInstance();
 	Calendar endTime = Calendar.getInstance();
+	Calendar gmtTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+
+	public EventDataFactory() {
+		currentTime.setTimeInMillis(System.currentTimeMillis());
+	}
 
 	public  EventData Build(long id, String title, boolean all_day, long begin, long end, int color1, int color2, boolean alarm, String location) {
-		beginTime.setTimeInMillis(begin);
-		endTime.setTimeInMillis(end);
 		String time = null;
 		if (all_day) {
-			boolean sameDay = (endTime.getTimeInMillis() - beginTime.getTimeInMillis()) / MILLIS_PER_HOUR < 25;
-			if (sameDay) {
+			gmtTime.setTimeInMillis(begin);
+			beginTime.set(gmtTime.get(Calendar.YEAR), gmtTime.get(Calendar.MONTH), gmtTime.get(Calendar.DATE), 0, 0, 0);
+			gmtTime.setTimeInMillis(end-DateUtils.HOUR_IN_MILLIS);
+			endTime.set(gmtTime.get(Calendar.YEAR), gmtTime.get(Calendar.MONTH), gmtTime.get(Calendar.DATE), 0, 0, 0);
+			end = endTime.getTimeInMillis() + DateUtils.DAY_IN_MILLIS;
+			if (endTime.getTimeInMillis() <= beginTime.getTimeInMillis()) {
 				time = formatterDate.format(beginTime.getTime());
 			} else if (currentTime.getTimeInMillis() > beginTime.getTimeInMillis()) {
 				time = "-> " + formatterDate.format(endTime.getTime());
@@ -94,6 +102,11 @@ class EventDataFactory {
 				time = formatterDate.format(beginTime.getTime()) + " - " + formatterDate.format(endTime.getTime());
 			}
 		} else {
+			beginTime.setTimeInMillis(begin);
+			endTime.setTimeInMillis(end);
+			if (endTime.get(Calendar.HOUR_OF_DAY) == 0 && endTime.get(Calendar.MINUTE) == 0) {
+				endTime.setTimeInMillis(endTime.getTimeInMillis()-DateUtils.SECOND_IN_MILLIS);
+			}
 			boolean sameDay = (beginTime.get(Calendar.YEAR) == endTime.get(Calendar.YEAR)) &&
 					(beginTime.get(Calendar.DAY_OF_YEAR) == endTime.get(Calendar.DAY_OF_YEAR));
 			if (sameDay) {
@@ -101,11 +114,11 @@ class EventDataFactory {
 			} else if (currentTime.getTimeInMillis() > beginTime.getTimeInMillis()) {
 				time = "-> " + formatterDateTime.format(endTime.getTime());
 			} else {
-				time = formatterDateTime.format(beginTime.getTime()) + " - " + formatterDateTime.format(endTime.getTime());
+				time = formatterShorter.format(beginTime.getTime()) + " - " + formatterShorter.format(endTime.getTime());
 			}
 		}
 		if (color1 == 0) color1 = color2;
-		return new EventData(id, title, time, color1, alarm, location != null && location.length() > 0, endTime.getTimeInMillis());
+		return new EventData(id, title, time, color1, alarm, location != null && location.length() > 0, end);
 	}
 
 	public EventData NoEvents(int days) {

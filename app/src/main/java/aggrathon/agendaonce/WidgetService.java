@@ -14,7 +14,6 @@ import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 
 public class WidgetService extends RemoteViewsService {
 	@Override
