@@ -90,9 +90,9 @@ class EventDataFactory {
 		String time = null;
 		if (all_day) {
 			gmtTime.setTimeInMillis(begin);
-			beginTime.set(gmtTime.get(Calendar.YEAR), gmtTime.get(Calendar.MONTH), gmtTime.get(Calendar.DATE), 0, 0, 0);
+			beginTime.set(gmtTime.get(Calendar.YEAR), gmtTime.get(Calendar.MONTH), gmtTime.get(Calendar.DATE), 0, 0, 20);
 			gmtTime.setTimeInMillis(end-DateUtils.HOUR_IN_MILLIS);
-			endTime.set(gmtTime.get(Calendar.YEAR), gmtTime.get(Calendar.MONTH), gmtTime.get(Calendar.DATE), 0, 0, 0);
+			endTime.set(gmtTime.get(Calendar.YEAR), gmtTime.get(Calendar.MONTH), gmtTime.get(Calendar.DATE), 0, 0, 10);
 			end = endTime.getTimeInMillis() + DateUtils.DAY_IN_MILLIS;
 			if (endTime.getTimeInMillis() <= beginTime.getTimeInMillis()) {
 				time = formatterDate.format(beginTime.getTime());
